@@ -8,206 +8,181 @@ function sql(dialectName: keyof typeof import("@codemirror/lang-sql")) {
   return import("@codemirror/lang-sql").then(m => m.sql({dialect: (m as any)[dialectName]}))
 }
 
+function of(spec) {
+  let ld: LanguageDescription
+  const module: string = spec.module || ("@codemirror/lang-" + spec.name.toLowerCase())
+  if (!spec.load)
+    if (spec.loadName)
+      spec.load = () => import(module).then(m => m[spec.loadName]())
+    else
+      spec.load = () => import(module).then(m => m[spec.name.toLowerCase()]())
+  ld = LanguageDescription.of(spec)
+  ld.module = module
+  return ld
+}
+
 /// An array of language descriptions for known language packages.
 export const languages = [
   // New-style language modes
-  LanguageDescription.of({
+  of({
     name: "C",
     extensions: ["c","h","ino"],
-    load() {
-      return import("@codemirror/lang-cpp").then(m => m.cpp())
-    }
+    module: "@codemirror/lang-cpp",
+    loadName: "cpp"
   }),
-  LanguageDescription.of({
+  of({
     name: "C++",
     alias: ["cpp"],
     extensions: ["cpp","c++","cc","cxx","hpp","h++","hh","hxx"],
-    load() {
-      return import("@codemirror/lang-cpp").then(m => m.cpp())
-    }
+    module: "@codemirror/lang-cpp",
+    loadName: "cpp"
   }),
-  LanguageDescription.of({
+  of({
     name: "CQL",
     alias: ["cassandra"],
     extensions: ["cql"],
+    module: "@codemirror/lang-sql",
     load() { return sql("Cassandra") }
   }),
-  LanguageDescription.of({
+  of({
     name: "CSS",
     extensions: ["css"],
-    load() {
-      return import("@codemirror/lang-css").then(m => m.css())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "Go",
     extensions: ["go"],
-    load() {
-      return import("@codemirror/lang-go").then(m => m.go())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "HTML",
     alias: ["xhtml"],
     extensions: ["html", "htm", "handlebars", "hbs"],
-    load() {
-      return import("@codemirror/lang-html").then(m => m.html())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "Java",
     extensions: ["java"],
-    load() {
-      return import("@codemirror/lang-java").then(m => m.java())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "JavaScript",
     alias: ["ecmascript","js","node"],
-    extensions: ["js", "mjs", "cjs"],
-    load() {
-      return import("@codemirror/lang-javascript").then(m => m.javascript())
-    }
+    extensions: ["js", "mjs", "cjs"]
   }),
-  LanguageDescription.of({
+  of({
     name: "JSON",
     alias: ["json5"],
-    extensions: ["json","map"],
-    load() {
-      return import("@codemirror/lang-json").then(m => m.json())
-    }
+    extensions: ["json","map"]
   }),
-  LanguageDescription.of({
+  of({
     name: "JSX",
     extensions: ["jsx"],
+    module: "@codemirror/lang-javascript",
     load() {
       return import("@codemirror/lang-javascript").then(m => m.javascript({jsx: true}))
     }
   }),
-  LanguageDescription.of({
+  of({
     name: "LESS",
     extensions: ["less"],
-    load() {
-      return import("@codemirror/lang-less").then(m => m.less())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "Liquid",
     extensions: ["liquid"],
-    load() {
-      return import("@codemirror/lang-liquid").then(m => m.liquid())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "MariaDB SQL",
+    module: "@codemirror/lang-sql",
     load() { return sql("MariaSQL") }
   }),
-  LanguageDescription.of({
+  of({
     name: "Markdown",
     extensions: ["md", "markdown", "mkd"],
-    load() {
-      return import("@codemirror/lang-markdown").then(m => m.markdown())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "MS SQL",
+    module: "@codemirror/lang-sql",
     load() { return sql("MSSQL") }
   }),
-  LanguageDescription.of({
+  of({
     name: "MySQL",
+    module: "@codemirror/lang-sql",
     load() { return sql("MySQL") }
   }),
-  LanguageDescription.of({
+  of({
     name: "PHP",
     extensions: ["php", "php3", "php4", "php5", "php7", "phtml"],
-    load() {
-      return import("@codemirror/lang-php").then(m => m.php())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "PLSQL",
     extensions: ["pls"],
+    module: "@codemirror/lang-sql",
     load() { return sql("PLSQL") }
   }),
-  LanguageDescription.of({
+  of({
     name: "PostgreSQL",
+    module: "@codemirror/lang-sql",
     load() { return sql("PostgreSQL") }
   }),
-  LanguageDescription.of({
+  of({
     name: "Python",
     extensions: ["BUILD","bzl","py","pyw"],
     filename: /^(BUCK|BUILD)$/,
-    load() {
-      return import("@codemirror/lang-python").then(m => m.python())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "Rust",
     extensions: ["rs"],
-    load() {
-      return import("@codemirror/lang-rust").then(m => m.rust())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "Sass",
     extensions: ["sass"],
-    load() {
-      return import("@codemirror/lang-sass").then(m => m.sass({indented: true}))
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "SCSS",
     extensions: ["scss"],
-    load() {
-      return import("@codemirror/lang-sass").then(m => m.sass())
-    }
+    module: "@codemirror/lang-sass",
+    loadName: "sass"
   }),
-  LanguageDescription.of({
+  of({
     name: "SQL",
     extensions: ["sql"],
+    module: "@codemirror/lang-sql",
     load() { return sql("StandardSQL") }
   }),
-  LanguageDescription.of({
+  of({
     name: "SQLite",
+    module: "@codemirror/lang-sql",
     load() { return sql("SQLite") }
   }),
-  LanguageDescription.of({
+  of({
     name: "TSX",
     extensions: ["tsx"],
+    module: "@codemirror/lang-javascript",
     load() {
       return import("@codemirror/lang-javascript").then(m => m.javascript({jsx: true, typescript: true}))
     }
   }),
-  LanguageDescription.of({
+  of({
     name: "TypeScript",
     alias: ["ts"],
     extensions: ["ts","mts","cts"],
+    module: "@codemirror/lang-javascript",
     load() {
       return import("@codemirror/lang-javascript").then(m => m.javascript({typescript: true}))
     }
   }),
-  LanguageDescription.of({
+  of({
     name: "WebAssembly",
     extensions: ["wat","wast"],
-    load() {
-      return import("@codemirror/lang-wast").then(m => m.wast())
-    }
+    module: "@codemirror/lang-wast",
+    loadName: "wast"
   }),
-  LanguageDescription.of({
+  of({
     name: "XML",
     alias: ["rss","wsdl","xsd"],
     extensions: ["xml","xsl","xsd","svg"],
-    load() {
-      return import("@codemirror/lang-xml").then(m => m.xml())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "YAML",
     alias: ["yml"],
     extensions: ["yaml","yml"],
-    load() {
-      return import("@codemirror/lang-yaml").then(m => m.yaml())
-    }
   }),
 
   // Legacy modes ported from CodeMirror 5
