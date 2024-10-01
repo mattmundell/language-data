@@ -8,14 +8,32 @@ function sql(dialectName: keyof typeof import("@codemirror/lang-sql")) {
   return import("@codemirror/lang-sql").then(m => m.sql({dialect: (m as any)[dialectName]}))
 }
 
+function ofLegacy(spec) {
+  let ld: LanguageDescription
+  if (!spec.load) {
+    if (spec.loadName) {
+      const name: string = spec.loadName.toLowerCase()
+      spec.load = () => import("@codemirror/legacy-modes/mode/" + name).then(m => legacy(m[spec.loadName]))
+    }
+    else {
+      const name: string = spec.name.toLowerCase()
+      spec.load = () => import("@codemirror/legacy-modes/mode/" + name).then(m => legacy(m[name]))
+    }
+  }
+  ld = LanguageDescription.of(spec)
+  ld.module = "@codemirror/legacy-modes"
+  return ld
+}
+
 function of(spec) {
   let ld: LanguageDescription
   const module: string = spec.module || ("@codemirror/lang-" + spec.name.toLowerCase())
-  if (!spec.load)
+  if (!spec.load) {
     if (spec.loadName)
       spec.load = () => import(module).then(m => m[spec.loadName]())
     else
       spec.load = () => import(module).then(m => m[spec.name.toLowerCase()]())
+  }
   ld = LanguageDescription.of(spec)
   ld.module = module
   return ld
@@ -187,50 +205,34 @@ export const languages = [
 
   // Legacy modes ported from CodeMirror 5
 
-  LanguageDescription.of({
+  ofLegacy({
     name: "APL",
     extensions: ["dyalog","apl"],
-    load() {
-      return import("@codemirror/legacy-modes/mode/apl").then(m => legacy(m.apl))
-    }
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "PGP",
     alias: ["asciiarmor"],
     extensions: ["asc","pgp","sig"],
-    load() {
-      return import("@codemirror/legacy-modes/mode/asciiarmor").then(m => legacy(m.asciiArmor))
-    }
+    loadName: "asciiArmor"
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "ASN.1",
     extensions: ["asn","asn1"],
-    load() {
-      return import("@codemirror/legacy-modes/mode/asn1").then(m => legacy(m.asn1({})))
-    }
+    loadName: "asn1"
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "Asterisk",
     filename: /^extensions\.conf$/i,
-    load() {
-      return import("@codemirror/legacy-modes/mode/asterisk").then(m => legacy(m.asterisk))
-    }
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "Brainfuck",
     extensions: ["b","bf"],
-    load() {
-      return import("@codemirror/legacy-modes/mode/brainfuck").then(m => legacy(m.brainfuck))
-    }
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "Cobol",
     extensions: ["cob","cpy"],
-    load() {
-      return import("@codemirror/legacy-modes/mode/cobol").then(m => legacy(m.cobol))
-    }
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "C#",
     alias: ["csharp","cs"],
     extensions: ["cs"],
@@ -238,12 +240,9 @@ export const languages = [
       return import("@codemirror/legacy-modes/mode/clike").then(m => legacy(m.csharp))
     }
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "Clojure",
     extensions: ["clj","cljc","cljx"],
-    load() {
-      return import("@codemirror/legacy-modes/mode/clojure").then(m => legacy(m.clojure))
-    }
   }),
   LanguageDescription.of({
     name: "ClojureScript",
@@ -947,12 +946,9 @@ export const languages = [
       return import("@codemirror/legacy-modes/mode/yacas").then(m => legacy(m.yacas))
     }
   }),
-  LanguageDescription.of({
+  ofLegacy({
     name: "Z80",
     extensions: ["z80"],
-    load() {
-      return import("@codemirror/legacy-modes/mode/z80").then(m => legacy(m.z80))
-    }
   }),
   LanguageDescription.of({
     name: "MscGen",
@@ -975,17 +971,13 @@ export const languages = [
       return import("@codemirror/legacy-modes/mode/mscgen").then(m => legacy(m.msgenny))
     }
   }),
-  LanguageDescription.of({
+  of({
     name: "Vue",
     extensions: ["vue"],
-    load() {
-      return import("@codemirror/lang-vue").then(m => m.vue())
-    }
   }),
-  LanguageDescription.of({
+  of({
     name: "Angular Template",
-    load() {
-      return import("@codemirror/lang-angular").then(m => m.angular())
-    }
+    module: "@codemirror/lang-angular",
+    loadName: "angular"
   })
 ]
