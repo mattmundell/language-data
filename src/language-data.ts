@@ -22,6 +22,7 @@ function ofLegacy(spec) {
   }
   ld = LanguageDescription.of(spec)
   ld.module = "@codemirror/legacy-modes"
+  ld.legacy = 1
   return ld
 }
 
